@@ -279,6 +279,7 @@ def main():
             # Add full state names
             state_names = filtered_data[['StateAb', 'State']].drop_duplicates()
             plot_data = plot_data.merge(state_names, on='StateAb', how='left')
+            plot_data['annual_wage'] = plot_data['avg_wage'] * 2080
             
             fig = px.choropleth(
                 plot_data,
@@ -289,12 +290,12 @@ def main():
                 color_continuous_scale='Viridis',
                 labels={'avg_wage': 'Avg Hourly Wage ($)'},
                 title=f'{selected_role} - {wage_level} Wages by State',
-                height=600
+                height=600,
+                hover_data={'StateAb': False, 'State': True, 'avg_wage': ':.2f', 'annual_wage': ':,.0f'}
             )
             
             fig.update_traces(
-                hovertemplate='<b>%{customdata[0]}</b><br>Hourly: $%{z:.2f}/hr<br>Annual: $%{customdata[1]:,.0f}/yr<extra></extra>',
-                customdata=plot_data[['State', 'avg_wage']].apply(lambda x: [x['State'], x['avg_wage'] * 2080], axis=1).tolist()
+                hovertemplate='<b>%{customdata[0]}</b><br>Hourly: $%{customdata[1]:.2f}/hr<br>Annual: $%{customdata[2]:,.0f}/yr<extra></extra>'
             )
         
     else:  # Salary Classification Mode
@@ -328,12 +329,12 @@ def main():
                                                      'Level 3 (Experienced)', 'Level 4+ (Fully Competent)']},
                 labels={'classification': 'Wage Level Classification'},
                 title=f'{selected_role} - Your Salary Classification by State (${user_salary:.2f}/hr)',
-                height=600
+                height=600,
+                hover_data={'StateAb': False, 'State': True, 'classification': True}
             )
             
             fig.update_traces(
-                hovertemplate='<b>%{customdata}</b><br>Classification: %{z}<extra></extra>',
-                customdata=state_classification['State']
+                hovertemplate='<b>%{customdata[0]}</b><br>Classification: %{customdata[1]}<extra></extra>'
             )
         
     if viz_mode == 'Wage Amount' and map_detail == 'County-Level (detailed)':
@@ -350,15 +351,22 @@ def main():
             color_continuous_scale='Viridis',
             labels={wage_column: 'Hourly Wage ($)'},
             title=f'{selected_role} - {wage_level} Wages by County',
-            height=600
+            height=600,
+            hover_data={
+                'fips': False,
+                'CountyTownName': True,
+                'State': True,
+                'AreaName': True,
+                wage_column: ':.2f',
+                'annual_wage': ':,.0f'
+            }
         )
         
         fig.update_traces(
             hovertemplate='<b>%{customdata[0]}, %{customdata[1]}</b><br>' +
                          'Area: %{customdata[2]}<br>' +
-                         'Hourly: $%{z:.2f}/hr<br>' +
-                         'Annual: $%{customdata[3]:,.0f}/yr<extra></extra>',
-            customdata=plot_data[['CountyTownName', 'State', 'AreaName', 'annual_wage']].values
+                         'Hourly: $%{customdata[3]:.2f}/hr<br>' +
+                         'Annual: $%{customdata[4]:,.0f}/yr<extra></extra>'
         )
     
     elif viz_mode == 'Salary Classification' and map_detail == 'County-Level (detailed)':
@@ -385,14 +393,20 @@ def main():
                                                        'Level 3 (Experienced)', 'Level 4+ (Fully Competent)']},
             labels={'wage_classification': 'Wage Level Classification'},
             title=f'{selected_role} - Your Salary Classification by County (${user_salary:.2f}/hr)',
-            height=600
+            height=600,
+            hover_data={
+                'fips': False,
+                'CountyTownName': True,
+                'State': True,
+                'AreaName': True,
+                'wage_classification': True
+            }
         )
         
         fig.update_traces(
             hovertemplate='<b>%{customdata[0]}, %{customdata[1]}</b><br>' +
                          'Area: %{customdata[2]}<br>' +
-                         'Classification: %{z}<extra></extra>',
-            customdata=plot_data[['CountyTownName', 'State', 'AreaName']].values
+                         'Classification: %{customdata[3]}<extra></extra>'
         )
     
     fig.update_layout(
