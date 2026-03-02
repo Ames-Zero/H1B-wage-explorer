@@ -2,6 +2,8 @@
 
 An interactive Streamlit dashboard that visualizes H1B prevailing wage data across US geographical regions with filtering capabilities for job roles and wage levels.
 
+Access the streamlit demo here : https://h1b-wage-explorer.streamlit.app/
+
 ## Features
 
 - **Interactive Maps**: Visualize wages by state or county
